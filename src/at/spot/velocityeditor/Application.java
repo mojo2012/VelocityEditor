@@ -385,6 +385,9 @@ public class Application {
 	
 	private void newTemplate() {
 		templateScriptText.setText("");
+		variables.clear();
+		variablesTable.refresh();
+		log.setText("");
 		previewBrowser.setUrl("about:blank");
 	}
 	
@@ -479,13 +482,18 @@ public class Application {
 		
 		String tmp = templateScriptText.getText() + " ";
 
-		String regex = "\\$(.*?)([\\s,!?.])";
+		String regex = "\\$(.*?)[,!?\\(\\)\\[\\]\\#<>\\s]";
 		Pattern pattern = Pattern.compile(regex);
 		Matcher m = pattern.matcher(tmp);
 
 		while (m.find()) {
 			String t = tmp.substring(m.start() + 1, m.end() - 1);
 
+			//didn't find a way to delimit by \s or \.\s but not just a dot
+			if (StringUtils.endsWith(t, ".")) {
+				t = StringUtils.left(t, t.length() - 1);
+			}
+			
 			boolean found = false;
 
 			for (Variable var : variables) {
