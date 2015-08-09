@@ -1,10 +1,14 @@
 package at.spot.velocityeditor;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +42,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -55,6 +60,7 @@ import at.spot.velocityeditor.service.ImageResourceService;
 import at.spot.velocityeditor.service.TranslationService;
 
 public class Application {
+	private static final String[] DEFAULT_FILETYPES = new String[] { "*.html", "*.htm", "*.md", "*.txt" };
 
 	TranslationService translationService = TranslationService.getInstance();
 
@@ -144,7 +150,7 @@ public class Application {
 		newTemplateItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent paramSelectionEvent) {
-				openTemplate();
+				newTemplate();
 			}
 
 			@Override
@@ -156,7 +162,7 @@ public class Application {
 		saveTemplateItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent paramSelectionEvent) {
-				openTemplate();
+				saveTemplate();
 			}
 
 			@Override
@@ -168,7 +174,7 @@ public class Application {
 		saveOutputItem.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent paramSelectionEvent) {
-				openTemplate();
+				saveRenderedOutput();
 			}
 
 			@Override
@@ -188,17 +194,17 @@ public class Application {
 			}
 		});
 
-		ToolItem parseVariablesItem = createToolbarButton(Translations.TOOLITEM_PARSE_VARIABLES, UiConstants.TOOLITEM_PARSE_VARIABLES);
-		parseVariablesItem.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent paramSelectionEvent) {
-				parseVariableTokens();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent paramSelectionEvent) {
-			}
-		});
+//		ToolItem parseVariablesItem = createToolbarButton(Translations.TOOLITEM_PARSE_VARIABLES, UiConstants.TOOLITEM_PARSE_VARIABLES);
+//		parseVariablesItem.addSelectionListener(new SelectionListener() {
+//			@Override
+//			public void widgetSelected(SelectionEvent paramSelectionEvent) {
+//				parseVariableTokens();
+//			}
+//
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent paramSelectionEvent) {
+//			}
+//		});
 	}
 	
 	private ToolItem createToolbarButton(String textId, String imageId) {
@@ -277,6 +283,7 @@ public class Application {
 						v.setValue(text.getText());
 					}
 				});
+				
 				newEditor.selectAll();
 				newEditor.setFocus();
 				editor.setEditor(newEditor, item, EDITABLECOLUMN);
@@ -299,6 +306,7 @@ public class Application {
 
 			@Override
 			public void keyReleased(KeyEvent paramKeyEvent) {
+				parseVariableTokens();
 			}
 
 			@Override
@@ -307,11 +315,6 @@ public class Application {
 		});
 	}
 
-	private void openTemplate() {
-		// TODO Auto-generated method stub
-		
-	}
-	
 //	private void createVariablesTableControls() {
 //		SashForm container = new SashForm(shell, SWT.NONE);
 //		container.setCapture(false);
@@ -356,7 +359,124 @@ public class Application {
 		previewBrowser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 	}
 
+	// ################################################################################################
+	// functionality
+	// ################################################################################################
+
+	private void openTemplate() {
+		FileDialog dialog = new FileDialog(shell, SWT.OPEN); // SWT.SHEET not working :-(;
+		dialog.setFilterExtensions(DEFAULT_FILETYPES);
+		String result = dialog.open();
+		
+		if (StringUtils.isNotEmpty(result)) {
+			try (BufferedReader reader = Files.newBufferedReader(Paths.get(result))) {
+				String fileContent = "";
+				String line = null;
+				while ((line = reader.readLine()) != null) {
+					fileContent += line;
+				}
+				
+				templateScriptText.setText(fileContent);
+			} catch (IOException e) {
+				log.setText(ExceptionUtils.getStackTrace(e));
+			}		
+		}
+	}
+	
+	private void newTemplate() {
+		templateScriptText.setText("");
+		previewBrowser.setUrl("about:blank");
+	}
+	
+	private void saveTemplate() {
+		FileDialog dialog = new FileDialog(shell, SWT.SAVE); // SWT.SHEET not working :-(;
+		dialog.setFilterExtensions(DEFAULT_FILETYPES);
+		String result = dialog.open();
+		
+		if (StringUtils.isNotEmpty(result)) {
+			try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(result))) {
+				writer.write(templateScriptText.getText());
+			} catch (IOException e) {
+				log.setText(ExceptionUtils.getStackTrace(e));
+			}		
+		}
+	}
+	
+	private void saveRenderedOutput() {
+		FileDialog dialog = new FileDialog(shell, SWT.SAVE); // SWT.SHEET not working :-(;
+		dialog.setFilterExtensions(DEFAULT_FILETYPES);
+		String resultPath = dialog.open();
+		
+		if (StringUtils.isNotEmpty(resultPath)) {
+			try {
+				renderTemplateScript(new File(resultPath));
+			} catch (Exception e) {
+				log.setText(ExceptionUtils.getStackTrace(e));
+			}
+		}
+	}
+	
+	private void checkTemplateScript() {
+		try {
+			log.setText("");
+			String filePath = renderTemplateScript();
+			previewBrowser.setUrl(filePath);
+		} catch (Exception e) {
+			log.setText(ExceptionUtils.getStackTrace(e));
+		}
+	}
+
+	private String renderTemplateScript() throws IOException {
+		return renderTemplateScript(getTempFile());
+	}
+	
+	private String renderTemplateScript(File outputFile) {
+		Map<String, String> context = new HashMap<>();
+
+		for (Variable v : variables) {
+			if (!StringUtils.isEmpty(v.getName()))
+				context.put(v.getName(), v.getValue());
+		}
+
+		try {
+			final Writer writer = new FileWriter(outputFile);
+
+			final Template template = new Template();
+			final RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
+			runtimeServices.setProperty("path", ".");
+
+			final StringReader reader = new StringReader(templateScriptText.getText());
+			final SimpleNode node = runtimeServices.parse(reader, "NAME");
+			
+			template.setRuntimeServices(runtimeServices);
+			template.setData(node);
+			template.setEncoding("UTF-8");
+			template.initDocument();
+
+			template.merge(new VelocityContext(context), writer);
+			writer.flush();
+
+			writer.close();
+
+			return outputFile.getAbsolutePath();
+		} catch (final Exception e) {
+			throw new VelocityException("Parsing of the email template using runtime services goes wrong", e);
+		}
+	}
+	
 	private void parseVariableTokens() {
+		//clear variables from the table that have no value yet
+		List<Variable> newVariables = new ArrayList<>();
+		
+		for (Variable v : variables) {
+			if (!StringUtils.isEmpty(v.getValue())) {
+				newVariables.add(v);
+			}
+		}
+		
+		variables.clear();
+		variables.addAll(newVariables);
+		
 		String tmp = templateScriptText.getText() + " ";
 
 		String regex = "\\$(.*?)([\\s,!?.])";
@@ -380,49 +500,6 @@ public class Application {
 		}
 
 		variablesTable.refresh();
-	}
-
-	private void checkTemplateScript() {
-		try {
-			log.setText("");
-			String filePath = renderTemplateScript();
-			previewBrowser.setUrl(filePath);
-		} catch (Exception e) {
-			log.setText(ExceptionUtils.getStackTrace(e));
-		}
-	}
-
-	private String renderTemplateScript() {
-		Map<String, String> context = new HashMap<>();
-
-		for (Variable v : variables) {
-			if (!StringUtils.isEmpty(v.getName()))
-				context.put(v.getName(), v.getValue());
-		}
-
-		try {
-			final File previewFile = getTempFile();
-			final Writer writer = new FileWriter(previewFile);
-
-			final Template template = new Template();
-			final RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
-			final StringReader reader = new StringReader(templateScriptText.getText());
-			final SimpleNode node = runtimeServices.parse(reader, "NAME");
-
-			template.setRuntimeServices(runtimeServices);
-			template.setData(node);
-			template.setEncoding("UTF-8");
-			template.initDocument();
-
-			template.merge(new VelocityContext(context), writer);
-			writer.flush();
-
-			writer.close();
-
-			return previewFile.getAbsolutePath();
-		} catch (final Exception e) {
-			throw new VelocityException("Parsing of the email template using runtime services goes wrong", e);
-		}
 	}
 
 	private File getTempFile() throws IOException {
