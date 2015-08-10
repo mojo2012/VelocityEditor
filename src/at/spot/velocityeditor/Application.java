@@ -482,7 +482,7 @@ public class Application {
 		
 		String tmp = templateScriptText.getText() + " ";
 
-		String regex = "\\$(.*?)[,!?\\(\\)\\[\\]\\#<>\\s]";
+		String regex = "\\$(.*?)[:,!?\\(\\)\\[\\]\\#<>\\s]";
 		Pattern pattern = Pattern.compile(regex);
 		Matcher m = pattern.matcher(tmp);
 
