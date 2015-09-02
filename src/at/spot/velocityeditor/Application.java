@@ -438,7 +438,9 @@ public class Application {
 
 		for (Variable v : variables) {
 			if (!StringUtils.isEmpty(v.getName()))
-				context.put(v.getName(), v.getValue());
+				//remove the . symbolizing a property access of an object with and transform the whole object with a flat variable
+				//do this also on the template script before letting velocity render the template
+				context.put(v.getName().replace(".", "_"), v.getValue());
 		}
 
 		try {
@@ -448,7 +450,7 @@ public class Application {
 			final RuntimeServices runtimeServices = RuntimeSingleton.getRuntimeServices();
 			runtimeServices.setProperty("path", ".");
 
-			final StringReader reader = new StringReader(templateScriptText.getText());
+			final StringReader reader = new StringReader(templateScriptText.getText().replace(".", "_"));
 			final SimpleNode node = runtimeServices.parse(reader, "NAME");
 			
 			template.setRuntimeServices(runtimeServices);
