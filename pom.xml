@@ -3,10 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.spot</groupId>
 	<artifactId>velocity.editor</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.2</version>
 	<name>VelocityEditor</name>
-
-
+	<packaging>jar</packaging>
 
 	<!-- important to switch to plain http, other wise we get some SSL issues -->
 	<repositories>
@@ -49,19 +48,46 @@
 				</excludes>
 			</resource>
 		</resources>
+
 		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>at.spot.velocityeditor.Application</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- create mac app bundle -->
 			<plugin>
 				<groupId>sh.tak.appbundler</groupId>
 				<artifactId>appbundle-maven-plugin</artifactId>
 				<version>1.0.4</version>
 				<configuration>
-					<mainClass>at.spot.velocityeditor.Application</mainClass>
-					<!-- <dictionaryFile>bundle/VelocityEditor.plist</dictionaryFile> -->
-					<iconFile>bundle/VelocityEditor.icns</iconFile>
-					<jrePath>/Library/Java/JavaVirtualMachines/jdk1.8.0_25.jdk</jrePath>
-					<jvmOptions>
-						<jvmOption>-</jvmOption>
-					</jvmOptions>
+					<mainClass>your.app.MainClass</mainClass>
 				</configuration>
 				<executions>
 					<execution>
@@ -72,14 +98,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 	<dependencies>
@@ -87,47 +105,55 @@
 			<groupId>org.eclipse</groupId>
 			<artifactId>swt</artifactId>
 			<version>3.3.0-v3346</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.swt</groupId>
 			<artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
 			<version>4.3</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse</groupId>
 			<artifactId>jface</artifactId>
 			<version>3.3.0-I20070606-0010</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jface</groupId>
 			<artifactId>text</artifactId>
 			<version>3.3.0-v20070606-0010</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.equinox</groupId>
 			<artifactId>common</artifactId>
 			<version>3.6.200-v20130402-1505</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
 			<artifactId>velocity</artifactId>
 			<version>1.7</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-collections4</artifactId>
 			<version>4.0</version>
+			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.4</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 

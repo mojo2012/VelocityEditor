@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Main-Class: at.spot.velocityeditor.Application
 Bundle-ManifestVersion: 2
 Bundle-Name: VelocityEditor
 Bundle-SymbolicName: VelocityEditor
