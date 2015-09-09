@@ -21,7 +21,13 @@
 				<updatePolicy>never</updatePolicy>
 			</releases>
 		</repository>
+
+		<repository>
+			<id>swt-repo</id>
+			<url>http://raw.githubusercontent.com/maven-eclipse/swt-repo/master/</url>
+		</repository>
 	</repositories>
+
 
 	<pluginRepositories>
 		<pluginRepository>
@@ -82,12 +88,17 @@
 			</plugin>
 
 			<!-- create mac app bundle -->
+			<!-- usage: mvn package appbundle:bundle -->
 			<plugin>
 				<groupId>sh.tak.appbundler</groupId>
 				<artifactId>appbundle-maven-plugin</artifactId>
 				<version>1.0.4</version>
 				<configuration>
-					<mainClass>your.app.MainClass</mainClass>
+					<jvmOptions>
+						<jvmOption>-XstartOnFirstThread</jvmOption>
+					</jvmOptions>
+					<mainClass>at.spot.velocityeditor.Application</mainClass>
+					<iconFile>bundle/VelocityEditor.icns</iconFile>
 				</configuration>
 				<executions>
 					<execution>
@@ -111,7 +122,7 @@
 		<dependency>
 			<groupId>org.eclipse.swt</groupId>
 			<artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-			<version>4.3</version>
+			<version>4.4</version>
 			<scope>compile</scope>
 		</dependency>
 
