@@ -50,6 +50,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Component;
 
 import at.spot.velocityeditor.constants.ApplicationConstants;
 import at.spot.velocityeditor.constants.Translations;
@@ -59,11 +63,15 @@ import at.spot.velocityeditor.contentprovider.dto.Variable;
 import at.spot.velocityeditor.service.ImageResourceService;
 import at.spot.velocityeditor.service.TranslationService;
 
+@Component("application")
 public class Application {
 	private static final String[] DEFAULT_FILETYPES = new String[] { "*.html", "*.htm", "*.md", "*.txt" };
 
-	TranslationService translationService = TranslationService.getInstance();
-
+	@Autowired
+	TranslationService translationService;
+	@Autowired
+	ImageResourceService imageResourceService;
+	
 	protected Shell	shell;
 	private Display	display;
 
@@ -85,8 +93,11 @@ public class Application {
 	 */
 	public static void main(String[] args) {
 		try {
-			Application mainWindow = new Application();
-			mainWindow.open();
+			ApplicationContext context = new ClassPathXmlApplicationContext("spring.xml");
+
+			Application app = context.getBean(Application.class);
+			app.open();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -211,7 +222,7 @@ public class Application {
 		ToolItem item = new ToolItem(toolBar, SWT.PUSH);
 		
 		if (StringUtils.isNotEmpty(textId)) {
-			Image image = ImageResourceService.getInstance().getImageResource(imageId, 24);
+			Image image = imageResourceService.getImageResource(imageId, 24);
 			item.setImage(image);
 		}
 		

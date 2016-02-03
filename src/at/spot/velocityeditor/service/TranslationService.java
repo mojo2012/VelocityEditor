@@ -4,6 +4,8 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.springframework.stereotype.Service;
+
 import at.spot.velocityeditor.constants.ApplicationConstants;
 
 /**
@@ -11,9 +13,8 @@ import at.spot.velocityeditor.constants.ApplicationConstants;
  * @author matthias
  *
  */
+@Service("translationService")
 public class TranslationService {
-	private static final TranslationService INSTANCE = new TranslationService();
-	
 	protected Locale			locale;
 	protected ResourceBundle	translation;
 
@@ -31,9 +32,5 @@ public class TranslationService {
 
 	public String getTranslation(String key) {
 		return translation.getString(key);
-	}
-	
-	public static TranslationService getInstance() {
-		return INSTANCE;
 	}
 }
