@@ -113,6 +113,7 @@ public class Application {
 
 		shell.open();
 		shell.layout();
+		shell.setMinimumSize(800, 600);
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
 				display.sleep();

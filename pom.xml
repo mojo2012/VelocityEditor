@@ -9,6 +9,12 @@
 
 	<!-- important to switch to plain http, other wise we get some SSL issues -->
 	<repositories>
+		<!-- SWT Eclipse repository -->
+		<repository>
+			<id>maven-eclipse-repo</id>
+			<url>http://maven-eclipse.github.io/maven</url>
+		</repository>
+
 		<repository>
 			<id>central</id>
 			<name>Maven Plugin Repository</name>
@@ -20,11 +26,6 @@
 			<releases>
 				<updatePolicy>never</updatePolicy>
 			</releases>
-		</repository>
-
-		<repository>
-			<id>swt-repo</id>
-			<url>http://raw.githubusercontent.com/maven-eclipse/swt-repo/master/</url>
 		</repository>
 	</repositories>
 
@@ -113,30 +114,13 @@
 	</build>
 	<dependencies>
 		<!-- SWT -->
-		
-		<!-- <dependency> -->
-		<!-- <groupId>org.eclipse</groupId> -->
-		<!-- <artifactId>swt</artifactId> -->
-		<!-- <version>3.3.0-v3346</version> -->
-		<!-- <scope>compile</scope> -->
-		<!-- </dependency> -->
 
-		<dependency>
-			<groupId>org.eclipse.equinox</groupId>
-			<artifactId>common</artifactId>
-			<version>3.6.200-v20130402-1505</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mod4j.org.eclipse</groupId>
-			<artifactId>swt</artifactId>
-			<version>3.5.0</version>
-		</dependency>
 		<dependency>
 			<groupId>org.eclipse.swt</groupId>
 			<artifactId>org.eclipse.swt.cocoa.macosx.x86_64</artifactId>
-			<version>4.3</version>
+			<version>4.5.1</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.eclipse</groupId>
 			<artifactId>jface</artifactId>
@@ -202,7 +186,7 @@
 			<artifactId>spring-expression</artifactId>
 			<version>4.2.4.RELEASE</version>
 		</dependency>
-		
+
 	</dependencies>
 
 
