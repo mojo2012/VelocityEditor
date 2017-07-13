@@ -1,20 +1,13 @@
 package at.spot.velocityeditor.service;
 
-import java.util.Properties;
+public interface ConfigurationService {
 
-import org.springframework.stereotype.Service;
+	/**
+	 * Returns the configuration value for the given key.
+	 * 
+	 * @param key
+	 * @return
+	 */
+	String getProperty(String key);
 
-@Service("configurationService")
-public class ConfigurationService {
-	
-	Properties prop = new Properties();
-
-	public ConfigurationService() {
-		
-//		prop.load(inStream);
-	}
-	
-	public String getProperty(String key) {
-		return null;
-	}
 }

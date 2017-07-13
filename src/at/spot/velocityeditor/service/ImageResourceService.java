@@ -1,14 +1,16 @@
 package at.spot.velocityeditor.service;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
-import org.springframework.stereotype.Service;
 
-import at.spot.velocityeditor.constants.UiConstants;
+public interface ImageResourceService {
 
-@Service("imageResourceService")
-public class ImageResourceService {
-	public Image getImageResource(String key, int imageSize) {
-		return new Image(Display.getDefault(), UiConstants.RES_BASE_PATH + imageSize + "/" + key);
-	}
+	/**
+	 * Loads an image resource with the given size.
+	 * 
+	 * @param key
+	 * @param imageSize
+	 * @return
+	 */
+	Image getImageResource(String key, int imageSize);
+
 }
